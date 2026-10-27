@@ -22,9 +22,11 @@ GitHub Actions builds these targets on pushes to `main`, pushes to `fix/**`, pul
 
 ## Current implementation status
 - JUCE plugin project with VST3 and Standalone targets.
-- Input/output gain and a basic tanh saturation stage are connected to the audio processor.
+- Input/output gain, amp gain/master, drive, and saturation mix are connected to the audio processor.
+- Six rotary controls use JUCE parameter attachments and are host-automatable.
+- The preset selector applies distinct starter parameter snapshots.
 - Parameter state is serialized by JUCE's AudioProcessorValueTreeState.
-- The editor and preset selector are a starter interface, not yet a finished production UI.
-- Preset selection, full knob attachments, tuner, spectrum analyzer, speaker animation, advanced amp/cabinet modeling, installer, and DAW/runtime compatibility testing remain future work.
+- The editor is a functional starter interface, not yet the requested final illustrated pedal design.
+- Tuner, spectrum analyzer, speaker animation, advanced amp/cabinet modeling, and DAW/runtime compatibility testing remain future work.
 
 A successful CI compile proves the binaries were built; it does not replace listening tests or validation inside a DAW on the target machine.
