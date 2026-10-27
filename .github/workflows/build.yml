@@ -1,0 +1,67 @@
+name: Build ORYMY Bass (Windows x64)
+
+on:
+  push:
+    branches: [ main, "fix/**" ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up MSBuild and CMake
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Configure
+        run: cmake -S . -B build -G "Visual Studio 18 2026" -A x64
+
+      - name: Compile VST3 and Standalone
+        run: cmake --build build --config Release --parallel 2
+
+      - name: Verify VST3 bundle and Standalone outputs
+        shell: pwsh
+        run: |
+          $bundle = "build/OrymyBass_artefacts/Release/VST3/ORYMY Bass.vst3"
+          $moduleInfo = Join-Path $bundle "Contents/Resources/moduleinfo.json"
+          $binary = Join-Path $bundle "Contents/x86_64-win/ORYMY Bass.vst3"
+          $app = "build/OrymyBass_artefacts/Release/Standalone/ORYMY Bass.exe"
+          foreach ($path in @($bundle, $moduleInfo, $binary, $app)) {
+            if (!(Test-Path $path)) { throw "Required output missing: $path" }
+          }
+          if ((Get-Item $binary).Length -lt 100000) { throw "VST3 binary appears too small or invalid: $binary" }
+          if ((Get-Item $moduleInfo).Length -lt 20) { throw "VST3 module metadata is empty: $moduleInfo" }
+          Write-Host "Verified VST3 bundle layout:"
+          Get-ChildItem $bundle -Recurse | Select-Object FullName, Length | Format-Table -AutoSize
+
+      - name: Install Inno Setup
+        run: choco install innosetup --yes --no-progress
+
+      - name: Build installer
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path output | Out-Null
+          $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+          if (!(Test-Path $iscc)) { $iscc = "$env:ProgramFiles\Inno Setup 6\ISCC.exe" }
+          if (!(Test-Path $iscc)) { throw "Inno Setup compiler not found" }
+          & $iscc "installer.iss"
+          if ($LASTEXITCODE -ne 0) { throw "Inno Setup failed with exit code $LASTEXITCODE" }
+          if (!(Test-Path "output/ORYMY-Bass-Setup.exe")) { throw "Setup.exe was not created" }
+
+      - name: Upload installable package
+        uses: actions/upload-artifact@v4
+        with:
+          name: ORYMY-Bass-Windows-x64
+          if-no-files-found: error
+          path: |
+            build/OrymyBass_artefacts/Release/VST3/ORYMY Bass.vst3/**
+            build/OrymyBass_artefacts/Release/Standalone/ORYMY Bass.exe
+            output/ORYMY-Bass-Setup.exe

@@ -2,7 +2,8 @@
 #include <juce_audio_processors/juce_audio_processors.h>
 #include <juce_dsp/juce_dsp.h>
 
-class OrymyBassAudioProcessor : public juce::AudioProcessor {
+class OrymyBassAudioProcessor : public juce::AudioProcessor
+{
 public:
     OrymyBassAudioProcessor();
     ~OrymyBassAudioProcessor() override;
@@ -14,7 +15,6 @@ public:
 
     juce::AudioProcessorEditor* createEditor() override;
     bool hasEditor() const override;
-
     const juce::String getName() const override;
 
     bool acceptsMidi() const override;
@@ -35,11 +35,8 @@ public:
 
 private:
     juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
-
-    // Módulos DSP
-    juce::dsp::ProcessorDuplicator<juce::dsp::IIR::Filter<float>, juce::dsp::IIR::Coefficients<float>> lowCutFilter;
     juce::dsp::Gain<float> inputGain;
     juce::dsp::Gain<float> outputGain;
-    
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(OrymyBassAudioProcessor)
 };
