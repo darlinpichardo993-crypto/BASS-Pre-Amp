@@ -27,13 +27,20 @@ jobs:
       - name: Compile VST3 and Standalone
         run: cmake --build build --config Release --parallel 2
 
-      - name: Verify expected outputs
+      - name: Verify VST3 bundle and Standalone outputs
         shell: pwsh
         run: |
-          $vst = "build/OrymyBass_artefacts/Release/VST3/ORYMY Bass.vst3"
+          $bundle = "build/OrymyBass_artefacts/Release/VST3/ORYMY Bass.vst3"
+          $moduleInfo = Join-Path $bundle "Contents/Resources/moduleinfo.json"
+          $binary = Join-Path $bundle "Contents/x86_64-win/ORYMY Bass.vst3"
           $app = "build/OrymyBass_artefacts/Release/Standalone/ORYMY Bass.exe"
-          if (!(Test-Path $vst)) { throw "VST3 bundle not found: $vst" }
-          if (!(Test-Path $app)) { throw "Standalone executable not found: $app" }
+          foreach ($path in @($bundle, $moduleInfo, $binary, $app)) {
+            if (!(Test-Path $path)) { throw "Required output missing: $path" }
+          }
+          if ((Get-Item $binary).Length -lt 100000) { throw "VST3 binary appears too small or invalid: $binary" }
+          if ((Get-Item $moduleInfo).Length -lt 20) { throw "VST3 module metadata is empty: $moduleInfo" }
+          Write-Host "Verified VST3 bundle layout:"
+          Get-ChildItem $bundle -Recurse | Select-Object FullName, Length | Format-Table -AutoSize
 
       - name: Install Inno Setup
         run: choco install innosetup --yes --no-progress
