@@ -1,5 +1,6 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
+#include <cmath>
 
 OrymyBassAudioProcessor::OrymyBassAudioProcessor()
     : AudioProcessor(BusesProperties()
@@ -90,7 +91,8 @@ void OrymyBassAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juc
 
     inputGain.setGainDecibels(readParam("input_gain", 0.0f));
     outputGain.setGainDecibels(readParam("output_gain", 0.0f));
-    inputGain.process(juce::dsp::ProcessContextReplacing<float>(juce::dsp::AudioBlock<float>(buffer)));
+    auto block = juce::dsp::AudioBlock<float>(buffer);
+    inputGain.process(juce::dsp::ProcessContextReplacing<float>(block));
 
     const float ampGain = readParam("amp_gain", 5.0f);
     const float master = readParam("amp_master", 7.0f);
@@ -110,7 +112,7 @@ void OrymyBassAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juc
         }
     }
 
-    outputGain.process(juce::dsp::ProcessContextReplacing<float>(juce::dsp::AudioBlock<float>(buffer)));
+    outputGain.process(juce::dsp::ProcessContextReplacing<float>(block));
 }
 
 bool OrymyBassAudioProcessor::hasEditor() const { return true; }
