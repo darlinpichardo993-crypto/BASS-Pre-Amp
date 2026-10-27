@@ -1,5 +1,5 @@
 #define MyAppName "ORYMY Bass"
-#define MyAppVersion "1.0.0"
+#define MyAppVersion "1.0.1"
 #define MyPublisher "YMY Sounds VST"
 
 [Setup]
@@ -22,8 +22,14 @@ UninstallDisplayIcon={app}\ORYMY Bass.exe
 [Tasks]
 Name: "desktopicon"; Description: "Create a desktop shortcut"; GroupDescription: "Additional shortcuts:"; Flags: unchecked
 
+[Dirs]
+Name: "{commoncf}\VST3\ORYMY Bass.vst3\Contents\Resources"
+Name: "{commoncf}\VST3\ORYMY Bass.vst3\Contents\x86_64-win"
+
 [Files]
-Source: "build\OrymyBass_artefacts\Release\VST3\ORYMY Bass.vst3\*"; DestDir: "{commoncf}\VST3\ORYMY Bass.vst3"; Flags: ignoreversion recursesubdirs createallsubdirs
+; Install the VST3 bundle using explicit paths so the Contents hierarchy cannot be flattened.
+Source: "build\OrymyBass_artefacts\Release\VST3\ORYMY Bass.vst3\Contents\Resources\moduleinfo.json"; DestDir: "{commoncf}\VST3\ORYMY Bass.vst3\Contents\Resources"; Flags: ignoreversion
+Source: "build\OrymyBass_artefacts\Release\VST3\ORYMY Bass.vst3\Contents\x86_64-win\ORYMY Bass.vst3"; DestDir: "{commoncf}\VST3\ORYMY Bass.vst3\Contents\x86_64-win"; Flags: ignoreversion
 Source: "build\OrymyBass_artefacts\Release\Standalone\ORYMY Bass.exe"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
