@@ -16,6 +16,7 @@ FetchContent_MakeAvailable(JUCE)
 
 juce_add_plugin(OrymyBass
     COMPANY_NAME "YMY Sounds VST"
+    BUNDLE_ID "com.ymysounds.orymybass"
     PLUGIN_NAME "ORYMY Bass"
     PLUGIN_MANUFACTURER_CODE YmyS
     PLUGIN_CODE OrBs
@@ -35,7 +36,10 @@ target_sources(OrymyBass PRIVATE
     source/PluginEditor.h
 )
 
-target_include_directories(OrymyBass PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/source")
+target_include_directories(OrymyBass PRIVATE
+    "${CMAKE_CURRENT_SOURCE_DIR}"
+    "${CMAKE_CURRENT_SOURCE_DIR}/source"
+)
 
 target_compile_definitions(OrymyBass PRIVATE
     JUCE_WEB_BROWSER=0
