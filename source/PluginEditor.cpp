@@ -1,47 +1,79 @@
-#include "PluginProcessor.h"
 #include "PluginEditor.h"
+#include "PluginProcessor.h"
 
 OrymyBassAudioProcessorEditor::OrymyBassAudioProcessorEditor(OrymyBassAudioProcessor& p)
-    : AudioProcessorEditor(&p), audioProcessor(p) {
-    
+    : AudioProcessorEditor(&p), audioProcessor(p)
+{
     setSize(1100, 720);
-    startTimerHz(30);
+    setResizable(true, true);
+    setResizeLimits(760, 500, 1600, 1000);
 
-    addAndMakeVisible(presetBox);
-    presetBox.addItem("Bachata Antony Santos", 1);
-    presetBox.addItem("Raulin Rodriguez", 2);
-    presetBox.addItem("Romeo Santos", 3);
-    presetBox.addItem("Max Santos Bass Style", 4);
-    presetBox.addItem("Slap Bachata", 5);
+    presetLabel.setText("PRESET", juce::dontSendNotification);
+    presetLabel.setColour(juce::Label::textColourId, juce::Colour(0xFFE4D8C6));
+    presetLabel.setFont(juce::Font(juce::FontOptions(12.0f, juce::Font::bold)));
+    addAndMakeVisible(presetLabel);
+
+    presetBox.addItem("Clean Bachata", 1);
+    presetBox.addItem("Antony Santos - Warm", 2);
+    presetBox.addItem("Raulin Rodriguez - Smooth", 3);
+    presetBox.addItem("Romeo - Modern", 4);
+    presetBox.addItem("Max Santos - Punch", 5);
+    presetBox.addItem("Slap Bachata", 6);
+    presetBox.addItem("Merengue - Tight", 7);
     presetBox.setSelectedId(1, juce::dontSendNotification);
+    presetBox.setTooltip("Presets will be wired to parameter states in a later DSP/UI pass.");
+    addAndMakeVisible(presetBox);
+    startTimerHz(30);
 }
 
-OrymyBassAudioProcessorEditor::~OrymyBassAudioProcessorEditor() {
+OrymyBassAudioProcessorEditor::~OrymyBassAudioProcessorEditor()
+{
     stopTimer();
 }
 
-void OrymyBassAudioProcessorEditor::paint(juce::Graphics& g) {
-    // Fondo general gris oscuro elegante con textura simulada
-    g.fillAll(juce::Colour(0xFF1E1E1E));
+void OrymyBassAudioProcessorEditor::paint(juce::Graphics& g)
+{
+    g.fillAll(juce::Colour(0xFF141719));
+    g.setColour(juce::Colour(0xFF22282B));
+    g.fillRect(0, 0, getWidth(), 78);
 
-    // Cabecera superior corporativa
-    g.setColour(juce::Colour(0xFF2A2A2A));
-    g.fillRect(0, 0, getWidth(), 60);
+    g.setColour(juce::Colour(0xFFC89B53));
+    g.fillRect(0, 76, getWidth(), 2);
 
-    g.setColour(juce::Colours::white);
-    g.setFont(18.0f);
-    g.drawText("O R Y M Y  BASS", 20, 15, 200, 30, juce::Justification::left);
+    g.setColour(juce::Colour(0xFFF4EEE3));
+    g.setFont(juce::Font(juce::FontOptions(25.0f, juce::Font::bold)));
+    g.drawText("ORYMY BASS", 24, 12, 300, 34, juce::Justification::left);
 
-    g.setFont(10.0f);
-    g.setColour(juce::Colours::lightgrey);
-    g.drawText("Y M Y   S O U N D S   V S T", 20, 35, 200, 20, juce::Justification::left);
-    g.drawText("EL SONIDO DE LA BACHATA Y EL MERENGUE", getWidth() - 240, 20, 220, 20, juce::Justification::right);
+    g.setColour(juce::Colour(0xFFC89B53));
+    g.setFont(juce::Font(juce::FontOptions(10.0f, juce::Font::bold)));
+    g.drawText("YMY SOUNDS  /  BACHATA • MERENGUE", 26, 46, 380, 18, juce::Justification::left);
+
+    g.setColour(juce::Colour(0xFF202629));
+    g.fillRoundedRectangle(20.0f, 102.0f, static_cast<float>(getWidth() - 40), 190.0f, 12.0f);
+    g.setColour(juce::Colour(0xFF3A4144));
+    g.drawRoundedRectangle(20.0f, 102.0f, static_cast<float>(getWidth() - 40), 190.0f, 12.0f, 1.0f);
+
+    g.setColour(juce::Colour(0xFFE4D8C6));
+    g.setFont(juce::Font(juce::FontOptions(14.0f, juce::Font::bold)));
+    g.drawText("PREAMP ENGINE", 40, 120, 260, 24, juce::Justification::left);
+
+    g.setColour(juce::Colour(0xFF9BA5A8));
+    g.setFont(juce::Font(juce::FontOptions(12.0f)));
+    g.drawText("Input gain  •  amp saturation  •  master  •  output gain", 40, 152, getWidth() - 80, 24, juce::Justification::left);
+    g.drawText("This initial interface is a buildable foundation; controls and preset switching still need full UI wiring.", 40, 188, getWidth() - 80, 42, juce::Justification::left);
+
+    g.setColour(juce::Colour(0xFFC89B53));
+    g.setFont(juce::Font(juce::FontOptions(11.0f, juce::Font::bold)));
+    g.drawText("ORYMY BASS  •  VERSION 1.0.0", 24, getHeight() - 34, getWidth() - 48, 18, juce::Justification::centredLeft);
 }
 
-void OrymyBassAudioProcessorEditor::resized() {
-    presetBox.setBounds(20, 90, 180, 30);
+void OrymyBassAudioProcessorEditor::resized()
+{
+    presetLabel.setBounds(30, 315, 80, 28);
+    presetBox.setBounds(105, 314, 270, 30);
 }
 
-void OrymyBassAudioProcessorEditor::timerCallback() {
-    // Actualizaciones periódicas de medidores y UI en tiempo real
+void OrymyBassAudioProcessorEditor::timerCallback()
+{
+    // Reserved for future visual metering; keep audio processing out of the UI timer.
 }
