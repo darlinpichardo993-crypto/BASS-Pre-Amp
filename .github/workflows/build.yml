@@ -1,0 +1,45 @@
+name: Build ORYMY Bass (Windows x64)
+
+on:
+  push:
+    branches: [ main, "fix/**" ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up MSBuild and CMake
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Configure
+        run: cmake -S . -B build -G "Visual Studio 17 2022" -A x64
+
+      - name: Compile VST3 and Standalone
+        run: cmake --build build --config Release --parallel 2
+
+      - name: Verify expected outputs
+        shell: pwsh
+        run: |
+          $vst = "build/OrymyBass_artefacts/Release/VST3/ORYMY Bass.vst3"
+          $app = "build/OrymyBass_artefacts/Release/Standalone/ORYMY Bass.exe"
+          if (!(Test-Path $vst)) { throw "VST3 bundle not found: $vst" }
+          if (!(Test-Path $app)) { throw "Standalone executable not found: $app" }
+
+      - name: Upload VST3 and Standalone
+        uses: actions/upload-artifact@v4
+        with:
+          name: ORYMY-Bass-Windows-x64
+          if-no-files-found: error
+          path: |
+            build/OrymyBass_artefacts/Release/VST3/ORYMY Bass.vst3/**
+            build/OrymyBass_artefacts/Release/Standalone/ORYMY Bass.exe
