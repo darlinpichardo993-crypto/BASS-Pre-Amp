@@ -22,7 +22,7 @@ jobs:
         uses: microsoft/setup-msbuild@v2
 
       - name: Configure
-        run: cmake -S . -B build -G "Visual Studio 17 2022" -A x64
+        run: cmake -S . -B build -G "Visual Studio 18 2026" -A x64
 
       - name: Compile VST3 and Standalone
         run: cmake --build build --config Release --parallel 2
@@ -35,7 +35,21 @@ jobs:
           if (!(Test-Path $vst)) { throw "VST3 bundle not found: $vst" }
           if (!(Test-Path $app)) { throw "Standalone executable not found: $app" }
 
-      - name: Upload VST3 and Standalone
+      - name: Install Inno Setup
+        run: choco install innosetup --yes --no-progress
+
+      - name: Build installer
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path output | Out-Null
+          $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+          if (!(Test-Path $iscc)) { $iscc = "$env:ProgramFiles\Inno Setup 6\ISCC.exe" }
+          if (!(Test-Path $iscc)) { throw "Inno Setup compiler not found" }
+          & $iscc "installer.iss"
+          if ($LASTEXITCODE -ne 0) { throw "Inno Setup failed with exit code $LASTEXITCODE" }
+          if (!(Test-Path "output/ORYMY-Bass-Setup.exe")) { throw "Setup.exe was not created" }
+
+      - name: Upload installable package
         uses: actions/upload-artifact@v4
         with:
           name: ORYMY-Bass-Windows-x64
@@ -43,3 +57,4 @@ jobs:
           path: |
             build/OrymyBass_artefacts/Release/VST3/ORYMY Bass.vst3/**
             build/OrymyBass_artefacts/Release/Standalone/ORYMY Bass.exe
+            output/ORYMY-Bass-Setup.exe
